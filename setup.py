@@ -7,4 +7,5 @@ setup(
     description="This model predicts a movie's gross revenue based on select feature data and generates movie recommendations based on user input",
     author='Lily Ren',
     license='MIT',
+    install_requires=['pandas']
 )

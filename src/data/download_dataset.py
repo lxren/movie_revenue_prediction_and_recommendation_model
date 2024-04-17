@@ -10,6 +10,6 @@ urls = [
 ]
 
 for (url, filename) in urls:
-    urlretrieve(url, f"data/{filename}")
+    urlretrieve(url, f"data/external/{filename}")
 
 

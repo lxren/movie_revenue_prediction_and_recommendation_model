@@ -60,9 +60,16 @@ These instructions will get you a copy of the project up and runnining on your l
 ### Prerequisites
 Install Python 3.5 or greater
 
+Optional: We recommend the use of a virtual environment (venv) when running the code on your local machine
+
 ## Running the code
 
-### Download the data
+### Intall libraries
+```bash
+pip install .
+```
+
+### Download data
 ```bash
 python src/data/download_data.py
 ```
