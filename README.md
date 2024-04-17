@@ -53,5 +53,18 @@ Project Organization
 
 
 --------
+Getting Started
+--------
+These instructions will get you a copy of the project up and runnining on your local machine. 
+
+### Prerequisites
+Install Python 3.5 or greater
+
+## Running the code
+
+### Download the data
+```bash
+python src/data/download_data.py
+```
 
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
