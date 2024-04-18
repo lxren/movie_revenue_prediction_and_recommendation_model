@@ -49,7 +49,7 @@ def make_wordcloud(genre_input):
     df['description_tmdb_processed'] = df['description_tmdb'].apply(preprocess_text)
 
     for index, row in df.iterrows():
-        df.at[index,'descriptions'] = row['description_letterboxd']+" "+row['description_imdb']+" "+row['description_tmdb']
+        df.at[index,'description_processed'] = row['description_letterboxd_processed']+" "+row['description_imdb_processed']+" "+row['description_tmdb_processed']
     
     # genres = ['Action', 'Adult', 'Adventure','Animation', 'Biography', 'Comedy', 'Crime', 'Documentary',
     #       #'Drama','Family', 'Fantasy', 'Film-Noir', 'History', 'Horror', 'Music','Musical',
@@ -91,7 +91,7 @@ def make_wordcloud(genre_input):
 
     colormap = colormap_mapping.get(genre_input, 'viridis')
     genre_df = df[df[genre_input] == 1]
-    text = ' '.join(genre_df['description_imdb_processed'])
+    text = ' '.join(genre_df['description_processed'])
     wordcloud = WordCloud(width=800, height=400, background_color ='white',colormap=colormap).generate(text)
     output_file = os.path.join(output_dir, f'{genre_input}_wordcloud.png')
     wordcloud.to_file(output_file)
