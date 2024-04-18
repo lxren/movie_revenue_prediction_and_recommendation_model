@@ -13,3 +13,4 @@ wordcloud
 nltk
 cpi
 matplotlib
+scikit-learn
