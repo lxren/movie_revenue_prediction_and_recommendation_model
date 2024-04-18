@@ -104,13 +104,10 @@ def make_wordcloud(genre_input):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--genre', help="Provide a genre from the following list:")
+    parser.add_argument('--genre', help="Provide a genre from the following list: 'Action', 'Adult', 'Adventure','Animation', 'Biography', 'Comedy', 'Crime', 'Documentary', 'Drama','Family', 'Fantasy', 'Film-Noir', 'History', 'Horror', 'Music', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Science Fiction', 'Sport','TV Movie', 'Thriller', 'War', 'Western'")
     args = parser.parse_args()
     genre = args.genre
     if not genre:
         genre = input('Please provide a genre you would like to visualize: ')
 
     make_wordcloud(genre)
-
-
-    

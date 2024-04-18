@@ -77,5 +77,11 @@ python src/data/download_dataset.py
 ```bash
 python src/data/make_dataset.py
 ```
+### Visualize Genre in Wordcloud
+```bash
+python src/visuaization/make_wordcloud.py --genre <genre_name>
+
+genre_name: Action|Adult|Adventure|Animation|Biography|Comedy|Crime|Documentary|Drama|Family|Fantasy|Film-Noir|History|Horror|Music|Musical|Mystery|Romance|Sci-Fi|Science Fiction|Sport|TV Movie|Thiller|War|Western>
+```
 
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
