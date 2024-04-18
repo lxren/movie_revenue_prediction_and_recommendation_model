@@ -4,20 +4,26 @@ from sklearn.metrics.pairwise import linear_kernel
 import argparse
 
 def recommend_movie(movie_input):
+
+    # Load dataset and combine descriptions from all three databases
     df = pd.read_csv('./data/interim/cleaned_film_dataset.csv')
     df['description_imdb'] = df['description_imdb'].str.replace('See full summary','',regex=True)
     for index, row in df.iterrows():
         df.at[index,'descriptions'] = row['description_letterboxd']+" "+row['description_imdb']+" "+row['description_tmdb']
 
+    # TFIDF vectorize the descriptions
     tfidf = TfidfVectorizer(stop_words='english')
     tfidf_matrix = tfidf.fit_transform(df['descriptions'])
     tfidf_matrix.shape
 
+    # Establish cosine similarity
     cosine_sim = linear_kernel(tfidf_matrix, tfidf_matrix)
 
+    # Differentiate between movies with the same title by adding year
     df['year'] = df['year'].astype(int)
     df['title_with_year'] = df['title'] + ' (' + df['year'].astype(str) + ')'
 
+    # Search for movie in database and look recommendations with similar descriptions based on cosine similarity
     indices = pd.Series(df.index, index=df['title_with_year']).drop_duplicates()
     if movie_input not in indices:
         raise Exception('Sorry, movie not found in database')
