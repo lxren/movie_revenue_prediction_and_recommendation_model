@@ -71,7 +71,11 @@ pip install .
 
 ### Download data
 ```bash
-python src/data/download_data.py
+python src/data/download_dataset.py
+```
+### Run EDA
+```bash
+python src/data/make_dataset.py
 ```
 
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
