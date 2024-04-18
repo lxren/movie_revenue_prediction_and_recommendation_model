@@ -64,7 +64,7 @@ Optional: We recommend the use of a virtual environment (venv) when running the 
 
 ## Running the code
 
-### Intall libraries
+### Install libraries
 ```bash
 pip install .
 ```
