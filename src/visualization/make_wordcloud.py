@@ -3,9 +3,9 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import nltk
-nltk.download('punkt')
-nltk.download('stopwords')
-nltk.download('wordnet')
+nltk.download('punkt', quiet=True)
+nltk.download('stopwords', quiet=True)
+nltk.download('wordnet', quiet=True)
 from nltk.stem import PorterStemmer, WordNetLemmatizer
 import pandas as pd
 from wordcloud import WordCloud
@@ -33,7 +33,7 @@ def make_wordcloud(genre_input):
 
     # Process description text
     custom_stop_words = ['find','one','two','life','man','woman','young','must','take','boy','girl']
-    stop_words = set(stopwords.words('english'))#+custom_stop_words)
+    stop_words = set(stopwords.words('english')+custom_stop_words)
     lemmatizer = WordNetLemmatizer()
     
     def preprocess_text(text):
@@ -103,11 +103,13 @@ def make_wordcloud(genre_input):
 
 
 if __name__ == '__main__':
+    genres = ['Action', 'Adult', 'Adventure','Animation', 'Biography', 'Comedy', 'Crime', 'Documentary', 'Drama','Family', 'Fantasy', 'Film-Noir', 'History', 'Horror', 'Music', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Science Fiction', 'Sport','TV Movie', 'Thriller', 'War', 'Western']
     parser = argparse.ArgumentParser()
-    parser.add_argument('--genre', help="Provide a genre from the following list: 'Action', 'Adult', 'Adventure','Animation', 'Biography', 'Comedy', 'Crime', 'Documentary', 'Drama','Family', 'Fantasy', 'Film-Noir', 'History', 'Horror', 'Music', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Science Fiction', 'Sport','TV Movie', 'Thriller', 'War', 'Western'")
+    parser.add_argument('--genre', help=f"Provide a genre from the following list: {genres}")
     args = parser.parse_args()
     genre = args.genre
     if not genre:
         genre = input('Please provide a genre you would like to visualize: ')
-
+    if genre not in genres:
+        raise Exception("Invalid genre, try again")
     make_wordcloud(genre)
