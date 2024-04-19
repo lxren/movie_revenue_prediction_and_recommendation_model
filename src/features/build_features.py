@@ -209,9 +209,8 @@ def adjust_budget_by_ratings(row):
     else:
         return row['budget_adjusted'] * 0.95  # Decrease if low
 
-def build_features():
-    movies_df = pd.read_csv("data/interim/cleaned_film_dataset.csv")
-
+def build_features(movies_df):
+    
     # Remove the unnecessary columns for gross prediction
     movies_df.drop(columns=[
         'spoken_languages',
@@ -572,11 +571,15 @@ def build_features():
     # Remove columns from the DataFrame
     movies_df.drop(columns=columns_to_drop, inplace=True)
 
-    # Save to interim data
-    filepath = Path('data/interim/gross_predict_dataset.csv')
-    filepath.parent.mkdir(parents=True, exist_ok=True)
-    movies_df.to_csv(filepath, index=True)
+    return movies_df
 
 
 if __name__ == '__main__':
-    build_features()
+    #Extract data from CSV file
+    movies_df = pd.read_csv("data/interim/cleaned_film_dataset.csv")
+    build_features(movies_df)
+
+    # Save to interim data
+    filepath = Path('data/interim/gross_built_features_dataset.csv')
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    movies_df.to_csv(filepath, index=True)
