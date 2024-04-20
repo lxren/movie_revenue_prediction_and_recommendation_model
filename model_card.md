@@ -33,14 +33,58 @@ April 19, 2024
 - Letterboxd Dataset: 285,964 rows, 19 columns
 - Post Merging & EDA Dataset: 11,241 rows, 30 columns
 ### Features
+- 'Budget': (Float) Money used to produce film
+- 'Director': (Str) Main Director name who made the film
+- 'Lead Actor': (Str) Main actor staring in the film
+- 'Production Company': (Str) Main company who produced the film
+- 'Country of production': (Str) Country where the movie was produced
+- 'Genres': (List) List of genres that describe the film
+- 'Release Year': (Int) Year in which the movie was released
+- 'Season': (Str) Season of the year when the movie was released
+- 'Rating': (Float) Preliminary rating given by critics, from 0 - 10
+- 'Runtime': (Int) Duration of the film in minutes
+- 'Title': (Str) Name of the movie
+- 'Description' (Str) Sypnosis of the movie trama 
+
 ### Model Architecture
+
 #### Gross Revenue Predction Model
+
+Network Type: Sequential
+
+##### Configuration:
+- Input Layer: 128 units, ReLU activation, L2 regularization (0.01).
+- Dropout: 30% after the first and second dense layers.
+- Hidden Layers:
+    - First hidden layer: 64 units, ReLU activation, L2 regularization (0.01).
+    - Second hidden layer: 32 units, ReLU activation.
+- Output Layer: Single unit for regression output.
+- Optimizer: Adam, learning rate 0.001.
+- Loss Function: Mean Squared Error (MSE).
+
 #### Recommendation Engine
 The recommendation engine uses NLTK to process film descriptions collated from three databases. The descriptions are tokenized, lemmatized using WordNet, and Stop Words were implemented. The wordcloud library was used to generate word clouds across genres to implement additional stop words and visualize word clouds for term frequency. TF-IDF was used the vectorize the tokens and cosine similarity was performed on the TF-IDF matrix. Recommendations are made based on cosine similarity between tokenized film descriptions. 
 ## Training & Evaluation
 ### Training Procedure
+#### Data preparation
+- Feature Engineering: Input features were processed to generate training features by implementing statistical calculations, and filtering methods
+- Feature Selection: Features were selected based on their importance as determined by the select_features function.
+- Scaling: Data was standardized using a StandardScaler. If a scaler was not provided, a new scaler was created and fitted to the training data. The scaling process ensures that all input features contribute equally to model training by converting them to have zero mean and unit variance.
+- Data Splitting: The dataset was split into training and test sets with a ratio of 80:20 using a random seed for reproducibility.
+#### Training Parameters:
+- Epochs: 100
+- Batch Size: 32
+- Validation Split: 20%
+- Early Stopping: Monitored on validation loss with a patience of 10 epochs.
+- Optimizer: Adam, with learning rate of 0.001.
+This model uses dropout and L2 regularization to mitigate overfitting, employing early stopping during training to prevent overtraining on the validation set.
+
 ### Evaluation Metrics
+Metric for Loss: Mean Square Error 
+Metric for monitoring early stopping: val_loss
+
 ### Baseline Comparison
+N/A
 
 ## Ethical Considerations
 ### Fairness & Bias
