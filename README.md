@@ -91,10 +91,12 @@ python src/model/recommend_movie.py --movie <move_name_and_year>
 movie_name_and_year: Inception (2010)|Her (2013)|Dune (2021)|La La Land (2016)|Mars Attacks! (1996)|The Departed (2006)
 ```
 
+
 ### Adapt features for Gross prediction through feature engineering
 ```bash
 python /src/features/build_features.py
 ```
+
 
 ### Traing moodel for Gross prediction
 ```bash
