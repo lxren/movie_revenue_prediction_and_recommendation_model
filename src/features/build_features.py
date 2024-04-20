@@ -156,8 +156,12 @@ def adjust_data_format(movies_df):
         try:
             movies_df[col] = movies_df[col].astype(int)
         except:
-            print('Could not validate')
+            print(f'    - {col} not in the list')
     movies_df['release_date'] = pd.to_datetime(movies_df['release_date'])
+
+    # Adjust data type for 'Weighted_Rating' if it's in the columns list
+    if 'Weighted_Rating' in movies_df.columns:
+        movies_df['Weighted_Rating'] = movies_df['Weighted_Rating'].astype(float)
 
     # Merge genre columns and eliminate duplicated genres
     if 'genre' not in movies_df.columns:
@@ -584,16 +588,6 @@ def adapt_features_for_predictions(movies_df):
     print("Starting to standardize features names..")
     movies_df = standardize_data(movies_df)
     
-    print("Removing initial unnecessary columns...")
-    initial_drop_columns = [
-        'spoken_languages', 'popularity', 'description_tmdb', 'adult', 
-        'Unnamed: 0', 'imdb_id', 'original_language', 'description_letterboxd', 
-        'tmdb_id', 'description_imdb', 'director_id', 'star_id', 'revenue'
-    ]
-    try:
-        movies_df.drop(columns=initial_drop_columns, inplace=True, errors='ignore')
-    except:
-        print('Columns not found to remove')
     print("Adjusting format of dataset columns...")
     movies_df = adjust_data_format(movies_df)
 
