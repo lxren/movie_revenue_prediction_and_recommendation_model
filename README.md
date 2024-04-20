@@ -1,7 +1,7 @@
 Movie Revenue Prediction and Recommendation Model
 ==============================
 
-This model predicts a movie's gross revenue based on select feature data and generates movie recommendations based on user input
+This model predicts a movie's gross revenue based on select feature data and includes an engine that generates movie recommendations based on user input and NLP techniques. 
 
 Project Organization
 ------------
