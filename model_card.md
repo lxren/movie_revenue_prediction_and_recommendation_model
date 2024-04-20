@@ -33,10 +33,10 @@ April 19, 2024
 - Letterboxd Dataset: 285,964 rows, 19 columns
 - Post Merging & EDA Dataset: 11,241 rows, 30 columns
 ### Features
-- 'Budget': (Float) Money used to produce film
-- 'Director': (Str) Main Director name who made the film
-- 'Lead Actor': (Str) Main actor staring in the film
-- 'Production Company': (Str) Main company who produced the film
+- 'Budget': (Float) Budget used to produce film
+- 'Director': (Str) Main Director's name
+- 'Lead Actor': (Str) Main actor starring in the film
+- 'Production Company': (Str) Main company that produced the film
 - 'Country of production': (Str) Country where the movie was produced
 - 'Genres': (List) List of genres that describe the film
 - 'Release Year': (Int) Year in which the movie was released
@@ -96,11 +96,11 @@ N/A
 
 ## Limitations & Recommendations
 ### Known Limitations
-- This model don't consider the changing relevance of actors and directors, as any of them can become higly profitable suddenly
+- This model don't consider the changing relevance of actors and directors, as any of them can become highly profitable suddenly
 - Even though a Director's name can have significant impact on the gross of a movie, the quantity of films a director produced could be very reduced. 
-- There's is a considerable bias towards american films, since its relevance in movies productions, which can make gross prediction for movies from other countries less reliable.  
-- Obtained data for training was very reduced since the lack of information about gross and busget for films. More informative datasets are sold in industry competitive prices.
-- A considerable proportion of the training data was from many years ago, which can interefere with the gross prediction when combining with frequently changing features, such as directors and actors.
+- There's is a considerable bias towards American films, since its prevalence in movies productions, which can make gross prediction for movies from other countries less reliable.  
+- Obtained data for training was limited due to the lack of reliable information for film gross and budget. More informative datasets are sold in industry competitive prices, e.g. IMDB's full database API.
+- A considerable proportion of the training data is historical data, which can interefere with the gross prediction when combining with frequently changing features, such as directors and actors. Time and changing trends would greatly impact the results of this model. 
 
 ### Recommendations for Use
 - Use the model's outputs alongside industry research and market trends for informed decisions.
