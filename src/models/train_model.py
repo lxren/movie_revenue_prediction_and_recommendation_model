@@ -36,19 +36,19 @@ def transform_data_with_scaler(X, scaler):
     return X_scaled
 
 
-def train_model(selected_features_list_corrected, df, scaler=None):
+def train_model(selected_features, df, scaler=None):
     """
     Train a neural network model on provided data.
 
     Args:
-        selected_features_list_corrected (list): List of features to use.
+        selected_features (list): List of features to use.
         df (pd.DataFrame): The DataFrame containing the training data.
         scaler (StandardScaler): Optional. A previously fitted scaler. If not provided, a new scaler will be created and fitted.
 
     Returns:
         tf.keras.Model: The trained neural network model.
     """
-    X = df[selected_features_list_corrected]
+    X = df[selected_features]
     y = np.log1p(df['gross_adjusted'])  # Apply logarithmic transformation
 
     if not scaler:

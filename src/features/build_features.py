@@ -13,6 +13,109 @@ import os
 from tensorflow import keras
 import pdb
 
+top_directors = [
+    "Steven Spielberg", "James Cameron", "Anthony Russo", "Joe Russo", "Peter Jackson", "Michael Bay",
+    "David Yates", "Christopher Nolan", "J.J. Abrams", "Ridley Scott", "Tim Burton", "Robert Zemeckis",
+    "Jon Favreau", "Ron Howard", "Sam Raimi", "James Wan"
+] # Info source: https://www.the-numbers.com/box-office-star-records/worldwide/lifetime-specific-technical-role/director
+
+    
+top_stars = [
+    "Samuel L. Jackson", "Scarlett Johansson", "Robert Downey Jr.", "Zoe Saldana", "Chris Pratt",
+    "Tom Cruise", "Vin Diesel", "Chris Hemsworth", "Bradley Cooper", "Chris Evans", "Tom Hanks",
+    "Johnny Depp", "Dwayne Johnson", "Tom Holland", "Mark Ruffalo", "Emma Watson", "Don Cheadle",
+    "Dave Bautista", "Jeremy Renner", "Will Smith", "Karen Gillan", "Elizabeth Olsen", "Josh Brolin",
+    "Daniel Radcliffe", "Benedict Cumberbatch", "Harrison Ford", "Chadwick Boseman", "Rupert Grint",
+    "Letitia Wright", "Leonardo DiCaprio", "Steve Carell", "Sebastian Stan", "Matt Damon", "Danai Gurira",
+    "Tom Hiddleston", "Brad Pitt", "Paul Bettany", "Jack Black", "Bruce Willis", "Eddie Murphy",
+    "Liam Neeson", "Pom Klementieff", "Benedict Wong", "Sam Worthington", "Ben Stiller", "Hugh Jackman",
+    "Jason Statham", "Ian McKellen", "Gwyneth Paltrow", "Jennifer Lawrence", "Mark Wahlberg",
+    "Nicolas Cage", "Cameron Diaz", "Ewan McGregor", "Christian Bale"
+] # Info source: https://www.the-numbers.com/box-office-star-records/worldwide/lifetime-acting/top-grossing-leading-stars
+
+top_countries = [
+        "United States of America", "United Kingdom", "China", "France", "Japan",
+        "Germany", "South Korea", "Canada", "India", "Australia", "Hong Kong",
+        "New Zealand", "Italy", "Spain"
+] # Info source: https://www.the-numbers.com/movies/production-countries/#tab=territory
+
+
+# Define top producers and their replacements for searching in the dataset
+top_producers = {
+    'Warner Bros': [
+        'Warner Bros. Pictures',
+        'Warner Bros. Korea',
+        'Warner Bros. Television',
+        'Warner Bros-Seven Arts',
+        'Warner Bros. Animation',
+        'Warner Bros. Family Entertainment',
+        'Warner Bros. Pictures Animation',
+        'Warner Bros. Entertainment España',
+        'Warner Bros. Digital'
+    ],
+    'Universal Pictures': [
+        'Universal Pictures',
+        'Universal Pictures do Brasil',
+        'Universal Pictures International (UPI)'
+    ],
+    'Columbia Pictures': [
+        'Columbia Pictures',
+        'Columbia Pictures Film Production Asia',
+        'Columbia Pictures Producciones Mexico'
+    ],
+    'Paramount': [
+        'Paramount',
+        'Paramount Famous Lasky Corporation',
+        'Paramount Players',
+        'Paramount Animation',
+        'Paramount Vantage',
+        'Paramount Pictures Canada'
+    ],
+    '20th Century Fox': [
+        '20th Century Fox',
+        '20th Century Fox Animation',
+        '20th Century Fox Home Entertainment',
+        '20th Century Fox Argentina'
+    ],
+    'Dune Entertainment': [
+        'Dune Entertainment',
+        'Dune Entertainment III'
+    ],
+    'Metro-Goldwyn-Mayer': [
+        'Metro-Goldwyn-Mayer',
+        'Metro-Goldwyn Pictures Corporation'
+    ],
+    'Village Roadshow Pictures': [
+        'Village Roadshow Pictures',
+        'Village Roadshow Pictures Asia'
+    ],
+    'Walt Disney': [
+        'Walt Disney Pictures',
+        'Walt Disney Productions',
+        'Walt Disney Animation Studios',
+        'Walt Disney Animation',
+        'Walt Disney Feature Animation'
+    ],
+    'Lionsgate': [
+        'Lionsgate',
+        'Lionsgate Home Entertainment'
+    ],
+    'Illumination': [
+        'Illumination',
+        'Illuminations Films'
+    ]
+} # Info source: https://www.the-numbers.com/movies/production-companies/#production_companies_overview=od3
+
+def get_genre_list(movies_df = pd.read_csv("data/interim/cleaned_film_dataset.csv")):
+    movies_df['genre'] = movies_df['genre_letterboxd'].astype(str).str.replace(r"[\"\[\]]", "", regex=True) + ', ' + \
+                            movies_df['genre_tmdb'] + ', ' + movies_df['genre_imdb']
+    movies_df['genre'] = movies_df['genre'].str.lower().str.replace(' ', '').apply(lambda x: ', '.join(list(set(x.split(',')))))
+    movies_df.drop(columns=['genre_letterboxd', 'genre_imdb', 'genre_tmdb'], inplace=True)
+    genre_list = movies_df['genre'].str.get_dummies(sep=', ').columns
+    genre_list = genre_list.drop(['film-noir', 'music', 'sciencefiction'])
+    return list(genre_list)
+
+
 def standardize_data(movies_df):
     """
     Standardizes the DataFrame to have the necessary columns for processing.
@@ -29,11 +132,11 @@ def standardize_data(movies_df):
                         'Director': 'director',
                         'Lead Actor': 'star', 
                         'Production Company': 'production_companies',
-                        'Country of production': 'production_countries', 
+                        'Country of production': 'production_country', 
                         'Genres': 'genre',
                         'Release Year': 'year', 
                         'Release Date (dd/mm/yyyy)': 'release_date',
-                        'Rating': 'rating',
+                        'Rating': 'Weighted_Rating',
                         'Runtime': 'runtime'}
 
     # Rename columns to match standard column names
@@ -64,14 +167,15 @@ def adjust_data_format(movies_df):
         movies_df.drop(columns=['genre_letterboxd', 'genre_imdb', 'genre_tmdb'], inplace=True)
 
     # Extract only the first production country
-    movies_df['production_countries'] = movies_df['production_countries'].apply(ast.literal_eval)
-    max_countries = movies_df['production_countries'].apply(len).max()
-    for i in range(max_countries):
-        col_name = f'country_{i+1}'
-        movies_df[col_name] = movies_df['production_countries'].apply(lambda x: x[i] if i < len(x) else None)
-    movies_df.drop(columns=[f'country_{i}' for i in range(2, max_countries+1)], inplace=True)
-    movies_df.rename(columns={'country_1': 'production_country'}, inplace=True)
-    movies_df.drop('production_countries', axis=1, inplace=True)
+    if 'production_country' not in movies_df.columns:
+        movies_df['production_countries'] = movies_df['production_countries'].apply(ast.literal_eval)
+        max_countries = movies_df['production_countries'].apply(len).max()
+        for i in range(max_countries):
+            col_name = f'country_{i+1}'
+            movies_df[col_name] = movies_df['production_countries'].apply(lambda x: x[i] if i < len(x) else None)
+        movies_df.drop(columns=[f'country_{i}' for i in range(2, max_countries+1)], inplace=True)
+        movies_df.rename(columns={'country_1': 'production_country'}, inplace=True)
+        movies_df.drop('production_countries', axis=1, inplace=True)
 
 
     # Clean and deduplicate production companies names
@@ -94,14 +198,15 @@ def adjust_values(movies_df):
         movies_df.drop(columns=['budget'], inplace=True)
 
     # Merge 'rating_letterboxd' and 'rating_imdb' columns by calculating a weighted average
-    movies_df['Weighted_Rating'] = (
-        ((movies_df['rating_letterboxd'] * movies_df['vote_count_letterboxd']) +
-         (movies_df['rating_imdb'] * movies_df['vote_count_imdb'])) /
-        (movies_df['vote_count_letterboxd'] + movies_df['vote_count_imdb'])
-    )
-    movies_df.drop(columns=['rating_letterboxd', 'vote_count_letterboxd', 'rating_imdb', 'vote_count_imdb'], inplace=True)
+    if 'Weighted_Rating' not in movies_df.columns:
+        movies_df['Weighted_Rating'] = (
+            ((movies_df['rating_letterboxd'] * movies_df['vote_count_letterboxd']) +
+            (movies_df['rating_imdb'] * movies_df['vote_count_imdb'])) /
+            (movies_df['vote_count_letterboxd'] + movies_df['vote_count_imdb'])
+        )
+        movies_df.drop(columns=['rating_letterboxd', 'vote_count_letterboxd', 'rating_imdb', 'vote_count_imdb'], inplace=True)
 
-    # One-hot-encode genres
+
     # Generate one-hot encoding of genres
     one_hot_encoded_genres = movies_df['genre'].str.get_dummies(sep=', ')
 
@@ -123,12 +228,6 @@ def adjust_values(movies_df):
 def weight_rating_by_director(movies_df, search_director):
     """ Adjusts the weighting of movie ratings based on the relevance of the director."""
     # Select most relevant directors according to gross influence.
-    # Info source: https://www.the-numbers.com/box-office-star-records/worldwide/lifetime-specific-technical-role/director
-    top_directors = [
-        "Steven Spielberg", "James Cameron", "Anthony Russo", "Joe Russo", "Peter Jackson", "Michael Bay",
-        "David Yates", "Christopher Nolan", "J.J. Abrams", "Ridley Scott", "Tim Burton", "Robert Zemeckis",
-        "Jon Favreau", "Ron Howard", "Sam Raimi", "James Wan"
-    ]
 
     instances = 0
     irrelevant_directors = []
@@ -169,19 +268,6 @@ def weight_rating_by_actor(movies_df, search_star, is_top_star):
     DataFrame: The modified DataFrame with adjusted ratings.
     """
     # Select most relevant actors according to gross influence.
-    # Info source: https://www.the-numbers.com/box-office-star-records/worldwide/lifetime-acting/top-grossing-leading-stars
-    top_stars = [
-        "Samuel L. Jackson", "Scarlett Johansson", "Robert Downey Jr.", "Zoe Saldana", "Chris Pratt",
-        "Tom Cruise", "Vin Diesel", "Chris Hemsworth", "Bradley Cooper", "Chris Evans", "Tom Hanks",
-        "Johnny Depp", "Dwayne Johnson", "Tom Holland", "Mark Ruffalo", "Emma Watson", "Don Cheadle",
-        "Dave Bautista", "Jeremy Renner", "Will Smith", "Karen Gillan", "Elizabeth Olsen", "Josh Brolin",
-        "Daniel Radcliffe", "Benedict Cumberbatch", "Harrison Ford", "Chadwick Boseman", "Rupert Grint",
-        "Letitia Wright", "Leonardo DiCaprio", "Steve Carell", "Sebastian Stan", "Matt Damon", "Danai Gurira",
-        "Tom Hiddleston", "Brad Pitt", "Paul Bettany", "Jack Black", "Bruce Willis", "Eddie Murphy",
-        "Liam Neeson", "Pom Klementieff", "Benedict Wong", "Sam Worthington", "Ben Stiller", "Hugh Jackman",
-        "Jason Statham", "Ian McKellen", "Gwyneth Paltrow", "Jennifer Lawrence", "Mark Wahlberg",
-        "Nicolas Cage", "Cameron Diaz", "Ewan McGregor", "Christian Bale"
-    ]
 
     instances = 0
     irrelevant_stars = list()
@@ -211,11 +297,7 @@ def weight_rating_by_country(movies_df):
     Returns:
     DataFrame: The modified DataFrame with updated 'Weighted_Rating_Country' values.
     """
-    top_countries = [
-        "United States of America", "United Kingdom", "China", "France", "Japan",
-        "Germany", "South Korea", "Canada", "India", "Australia", "Hong Kong",
-        "New Zealand", "Italy", "Spain"
-    ]
+    
     # Adjust the Weighted_Rating based on the country of production.
     movies_df['Weighted_Rating_Country'] = movies_df.apply(
         lambda row: (row['Weighted_Rating'] * 1.1) if row['production_country'] in top_countries else (row['Weighted_Rating'] * 0.9),
@@ -233,87 +315,9 @@ def weight_ratings_by_producer_relevance(movies_df):
     Returns:
     DataFrame: The modified DataFrame with a new column for weighted ratings by company relevance.
     """
-    # Define top producers and their replacements in the dataset
-    top_producers = [
-        "Warner Bros", "Universal Pictures", "Columbia Pictures", "Marvel Studios",
-        "Walt Disney Pictures", "Paramount", "20th Century Fox", "Legendary Pictures",
-        "New Line Cinema", "DreamWorks Animation", "Dune Entertainment",
-        "Amblin Entertainment", "Disney-Pixar", "Relativity Media",
-        "Metro-Goldwyn-Mayer Pictures", "Village Roadshow Productions",
-        "DreamWorks Pictures", "Heyday Films", "Regency Enterprises", "Lucasfilm",
-        "Walt Disney Animation Studios", "Lionsgate", "TSG Entertainment",
-        "RatPac Entertainment", "Illumination Entertainment", "Original Film",
-        "Skydance Productions", "Summit Entertainment", "Touchstone Pictures",
-        "di Bonaventura Pictures"
-    ]
-
-    replacements = {
-        'Warner Bros': [
-            'Warner Bros. Pictures',
-            'Warner Bros. Korea',
-            'Warner Bros. Television',
-            'Warner Bros-Seven Arts',
-            'Warner Bros. Animation',
-            'Warner Bros. Family Entertainment',
-            'Warner Bros. Pictures Animation',
-            'Warner Bros. Entertainment España',
-            'Warner Bros. Digital'
-        ],
-        'Universal Pictures': [
-            'Universal Pictures',
-            'Universal Pictures do Brasil',
-            'Universal Pictures International (UPI)'
-        ],
-        'Columbia Pictures': [
-            'Columbia Pictures',
-            'Columbia Pictures Film Production Asia',
-            'Columbia Pictures Producciones Mexico'
-        ],
-        'Paramount': [
-            'Paramount',
-            'Paramount Famous Lasky Corporation',
-            'Paramount Players',
-            'Paramount Animation',
-            'Paramount Vantage',
-            'Paramount Pictures Canada'
-        ],
-        '20th Century Fox': [
-            '20th Century Fox',
-            '20th Century Fox Animation',
-            '20th Century Fox Home Entertainment',
-            '20th Century Fox Argentina'
-        ],
-        'Dune Entertainment': [
-            'Dune Entertainment',
-            'Dune Entertainment III'
-        ],
-        'Metro-Goldwyn-Mayer': [
-            'Metro-Goldwyn-Mayer',
-            'Metro-Goldwyn Pictures Corporation'
-        ],
-        'Village Roadshow Pictures': [
-            'Village Roadshow Pictures',
-            'Village Roadshow Pictures Asia'
-        ],
-        'Walt Disney': [
-            'Walt Disney Pictures',
-            'Walt Disney Productions',
-            'Walt Disney Animation Studios',
-            'Walt Disney Animation',
-            'Walt Disney Feature Animation'
-        ],
-        'Lionsgate': [
-            'Lionsgate',
-            'Lionsgate Home Entertainment'
-        ],
-        'Illumination': [
-            'Illumination',
-            'Illuminations Films'
-        ]
-    }
 
     # Replace values for different production companies
-    movies_df = replace_values(movies_df, {'producer':'production_companies'}, replacements)
+    movies_df = replace_values(movies_df, {'producer':'production_companies'}, top_producers)
 
     # Apply the corrections considering that the name of the columns may be slightly different
     updated_top_producer_columns_corrected = [
@@ -393,8 +397,6 @@ def weight_ratings_by_budget(movies_df):
     movies_df['Adjusted_Budget'] = movies_df.apply(adjust_budget_by_ratings, axis=1)
     
     return movies_df
-
-
 
 
 
@@ -568,6 +570,63 @@ def adjust_budget_by_ratings(row):
         return row['budget_adjusted'] * 1.05  # Slightly increase if moderately high
     else:
         return row['budget_adjusted'] * 0.95  # Decrease if low
+
+def adapt_features_for_predictions(movies_df):
+    """
+    Enhance and clean a DataFrame of movie data to prepare for further analysis.
+
+    Args:
+        movies_df (pandas.DataFrame): The DataFrame containing the movies data.
+
+    Returns:
+        pandas.DataFrame: The cleaned and enhanced DataFrame.
+    """
+    print("Starting to standardize features names..")
+    movies_df = standardize_data(movies_df)
+    
+    print("Removing initial unnecessary columns...")
+    initial_drop_columns = [
+        'spoken_languages', 'popularity', 'description_tmdb', 'adult', 
+        'Unnamed: 0', 'imdb_id', 'original_language', 'description_letterboxd', 
+        'tmdb_id', 'description_imdb', 'director_id', 'star_id', 'revenue'
+    ]
+    try:
+        movies_df.drop(columns=initial_drop_columns, inplace=True, errors='ignore')
+    except:
+        print('Columns not found to remove')
+    print("Adjusting format of dataset columns...")
+    movies_df = adjust_data_format(movies_df)
+
+    print("Adjusting monetary values and ratings...")
+    movies_df = adjust_values(movies_df)
+
+    print("Applying weighting by director...")
+    movies_df = weight_rating_by_director(movies_df, search_director)
+
+    print("Applying weighting by lead actor...")
+    movies_df = weight_rating_by_actor(movies_df, search_star, is_top_star)
+
+    print("Applying weighting by country...")
+    movies_df = weight_rating_by_country(movies_df)
+
+    print("Applying weighting by producer relevance...")
+    movies_df = weight_ratings_by_producer_relevance(movies_df)
+
+    print("Applying weighting based on budget considerations...")
+    movies_df = weight_ratings_by_budget(movies_df)
+
+    print("Removing final unnecessary columns...")
+    final_drop_columns = [
+        'title', 'year', 'director', 'star', 'runtime', 
+        'production_companies', 'production_country', 'season', 'budget_adjusted'
+    ]
+    try:
+        movies_df.drop(columns=final_drop_columns, inplace=True, errors='ignore')
+    except:
+        print('Columns not found to remove')
+    print("Feature building process completed.")
+
+    return movies_df
 
 
 def build_features(movies_df):
