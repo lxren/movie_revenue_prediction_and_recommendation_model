@@ -5,30 +5,57 @@ import numpy as np
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+import joblib
 
-def train_model(selected_features_list_corrected, df):
+def create_and_fit_scaler(X):
+    """
+    Creates a scaler, fits it on the provided data, and returns the fitted scaler.
 
-    # List of selected features
-    selected_features_list_corrected = [
-        'Adjusted_Revenue', 'Adjusted_Budget', 'Weighted_Rating_Adjusted_Revenue_Mean',
-        'Weighted_Rating_Adjusted_Budget_Mean', 'Weighted_Rating_Adjusted_Revenue_Median',
-        'Weighted_Rating_Adjusted_Budget_Median', 'Weighted_Rating_Actors', 'Weighted_Director',
-        'Weighted_Rating_Country', 'Average_Weighted_Rating', 'Weighted_Rating',
-        'Weighted_Rating_Companies', 'Average_Adjusted_Ratings'
-    ]
+    Args:
+        X (pd.DataFrame): Data to fit the scaler on.
 
-    # Separate the characteristics and the target variable
-    X = df[selected_features_list_corrected]
-    y = df['gross_adjusted']
-
-    # Apply a logarithmic transformation to the target variable to reduce the bias
-    y = np.log1p(y)
-
-    # Normalize data
+    Returns:
+        StandardScaler: The fitted scaler.
+    """
     scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
+    scaler.fit(X)
+    return scaler
 
-    # Split the data into training and test sets
+def transform_data_with_scaler(X, scaler):
+    """
+    Transforms data using the provided fitted scaler.
+
+    Args:
+        X (pd.DataFrame): Data to transform.
+        scaler (StandardScaler): A previously fitted scaler.
+
+    Returns:
+        np.array: The scaled data.
+    """
+    X_scaled = scaler.transform(X)
+    return X_scaled
+
+
+def train_model(selected_features_list_corrected, df, scaler=None):
+    """
+    Train a neural network model on provided data.
+
+    Args:
+        selected_features_list_corrected (list): List of features to use.
+        df (pd.DataFrame): The DataFrame containing the training data.
+        scaler (StandardScaler): Optional. A previously fitted scaler. If not provided, a new scaler will be created and fitted.
+
+    Returns:
+        tf.keras.Model: The trained neural network model.
+    """
+    X = df[selected_features_list_corrected]
+    y = np.log1p(df['gross_adjusted'])  # Apply logarithmic transformation
+
+    if not scaler:
+        scaler = create_and_fit_scaler(X)  # Fit a new scaler if not provided
+
+    X_scaled = transform_data_with_scaler(X, scaler)  # Scale the data
+
     X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
 
     # Create the neural network model with improved regularization and dropout.
@@ -55,13 +82,14 @@ def train_model(selected_features_list_corrected, df):
     test_loss = model.evaluate(X_test, y_test)
     print("Root mean square error in the test set:", test_loss)
 
-    return model
+    return model, scaler 
 
 if __name__ == '__main__':
-    #Extract data from csv file
     movies_df = pd.read_csv("data/interim/gross_built_features_dataset.csv")
     selected_features = select_features(movies_df)
-    trained_model = train_model(selected_features, movies_df)
+    scaler = create_and_fit_scaler(movies_df[selected_features])  # Create and fit the scaler
+    trained_model, scaler = train_model(selected_features, movies_df, scaler)
+    joblib.dump(scaler, 'models/scaler.gz')
     trained_model.save('models/gross_prediction_model.keras')
 
 

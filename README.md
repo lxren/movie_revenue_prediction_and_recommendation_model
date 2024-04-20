@@ -36,10 +36,12 @@ Project Organization
     │   ├── __init__.py    <- Makes src a Python module
     │   │
     │   ├── data           <- Scripts to download or generate data
-    │   │   └── make_dataset.py
+    │   │   ├── download_dataset.py
+    │   │   └── make_dataset.py    
     │   │
     │   ├── features       <- Scripts to turn raw data into features for modeling
-    │   │   └── build_features.py
+    │   │   ├── build_features.py
+    │   │   └── select_features.py
     │   │
     │   ├── models         <- Scripts to train models and then use trained models to make
     │   │   │                 predictions
@@ -88,5 +90,21 @@ python src/model/recommend_movie.py --movie <move_name_and_year>
 
 movie_name_and_year: Inception (2010)|Her (2013)|Dune (2021)|La La Land (2016)|Mars Attacks! (1996)|The Departed (2006)
 ```
+
+### Adapt features for Gross prediction through feature engineering
+```bash
+python /src/features/build_features.py
+```
+
+### Traing moodel for Gross prediction
+```bash
+python /src/models/train_model.py
+```
+
+### Make Gross predictions through manual entries
+```bash
+python ".\src\models\predict_model.py"
+```
+
 
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
