@@ -88,7 +88,7 @@ N/A
 
 ## Ethical Considerations
 ### Fairness & Bias
-There may be bias in the dataset as it includes only a subset of movies due to data availability. The dataset is English despite the inclusion of foreign films, translation biases may be captured. The film's rating scores are weighted by the number of votes on each database platform in attempt to reduce bias and outliers. 
+There may be bias in the dataset as it includes only a subset of movies due to data availability. The dataset is English despite the inclusion of foreign films, translation biases may be captured. The film's rating scores are weighted by the number of votes on each database platform in attempt to reduce bias and outliers. Enhancing the training dataset to cover a broader spectrum of films to reduce geographic and cultural biases is highly recommended.
 ### Privacy
 N/A
 ### Security
@@ -96,4 +96,14 @@ N/A
 
 ## Limitations & Recommendations
 ### Known Limitations
+- This model don't consider the changing relevance of actors and directors, as any of them can become higly profitable suddenly
+- Even though a Director's name can have significant impact on the gross of a movie, the quantity of films a director produced could be very reduced. 
+- There's is a considerable bias towards american films, since its relevance in movies productions, which can make gross prediction for movies from other countries less reliable.  
+- Obtained data for training was very reduced since the lack of information about gross and busget for films. More informative datasets are sold in industry competitive prices.
+- A considerable proportion of the training data was from many years ago, which can interefere with the gross prediction when combining with frequently changing features, such as directors and actors.
+
 ### Recommendations for Use
+- Use the model's outputs alongside industry research and market trends for informed decisions.
+- Test the model with diverse datasets before real-world application.
+- Keep the model updated with new data to maintain relevance.
+
