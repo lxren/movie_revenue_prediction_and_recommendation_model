@@ -8,6 +8,7 @@ import src.features.build_features as bf
 from src.features.select_features import select_features
 import joblib
 import numpy as np
+import sys
 import pdb
 
 def predict_model(movies_to_predict, model_path='models/gross_prediction_model.keras', scaler_path='models/scaler.gz'):
@@ -46,16 +47,37 @@ def display_options(options, category_name):
         print(f"{idx}. {option}")
     return options
 
-def get_user_selection(options, input_prompt):
+def get_user_selection(options, input_prompt, allow_multiple = False):
+    selected_options = []
+
     while True:
         user_input = input(input_prompt)
-        if user_input.isdigit() and 1 <= int(user_input) <= len(options):
-            print(f'Choice: {options[int(user_input) - 1]}\n')
-            return options[int(user_input) - 1]
+        if (user_input.lower() == 'done') and (allow_multiple):
+            if not selected_options:
+                print("At least one genre must be selected. Please select at least one genre.")
+                continue
+            break
+        elif user_input.isdigit() and 1 <= int(user_input) <= len(options):
+            choice = options[int(user_input) - 1]
+            if choice not in selected_options:
+                selected_options.append(choice)
+                print(f"Added: {choice}")
+                if not allow_multiple:
+                    break
+            else:
+                print(f"{choice} is already selected.")
         elif user_input in options:
-            return user_input
+            if user_input not in selected_options:
+                selected_options.append(user_input)
+                print(f"Added: {user_input}")
+                if not allow_multiple:
+                    break
+            else:
+                print(f"{user_input} is already selected.")
         else:
             print("Invalid option, please try again.")
+        
+    return ', '.join(selected_options)
 
 def gather_movie_data():
     genre_list = sorted(bf.get_genre_list()) + ['Other Genre']
@@ -81,10 +103,15 @@ def gather_movie_data():
 
     while True:
         print('\nEntering new movie to predict gross...')
-        print("Enter movie details or type 'stop', 'quit', 'q', 'exit', or 'continue' to finish entering movies:\n")
+        print("\nEnter movie details or type 'done or 'd' to finish entering movies. \
+              You can cancel the process by writing 'quit' or 'q':\n")
         movie = {}
         for column in columns:
-            if column in categories.keys():
+            if column == 'Genres':
+                print(f"\n\nSelect Genres (you can choose multiple, but one at a time, write 'done' when you finish):")
+                options =  display_options(categories[column], column)
+                movie[column] = get_user_selection(categories[column], f"Enter {column} (or number): ", allow_multiple=True)
+            elif column in categories.keys():
                 # Using the display and selection logic for specific columns
                 options =  display_options(categories[column], column)
                 movie[column] = get_user_selection(options, f"Enter {column} (or number): ")
@@ -128,8 +155,11 @@ def gather_movie_data():
                                 print("Runtime must be a positive integer. Please try again.")
                         except ValueError:
                             print("Invalid input. Please enter an integer value for runtime.")
-                    elif value.lower() in ['stop', 'quit', 'exit', 'continue', 'q']:
+                    elif value.lower() in ['done', 'd']:
                         return pd.DataFrame(data)
+                    elif value.lower() in ['quit', 'q']:
+                        print("Canceling process of Gross Prediction ...\n")
+                        sys.exit(0)
                     else:
                         break
                 
@@ -149,6 +179,7 @@ if __name__ == '__main__':
     predictions = predict_model(prediction_movies)
     predictions_df = pd.DataFrame()
     predictions_df['predicted gross'] = pd.DataFrame(predictions)
+    predictions_df = predictions_df['predicted gross'].apply(lambda x: "${:,.2f}".format(x))
     predictions_df = pd.concat([prediction_movies['title'], predictions_df], axis=1)
     print(f'\nCalculated Gross Predictions for each input film are: \n\n {predictions_df}')
 
