@@ -107,7 +107,7 @@ python /src/models/train_model.py
 
 ### Make Gross predictions through manual entries
 ```bash
-python ".\src\models\predict_model.py"
+python /src/models/predict_model.py
 ```
 
 
