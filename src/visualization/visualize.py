@@ -1,5 +1,4 @@
 import ast
-import pandas as pd
 import numpy as np
 import pandas as pd
 import plotly.express as px
@@ -17,49 +16,39 @@ def get_season(month):
     else:
         return 'Fall'
 
-def visualize(movies_df):
-    # Tranform features for visualization purposes
-    movies_df.drop(columns=['genre_imdb','spoken_languages','description_tmdb','Unnamed: 0','genre_letterboxd', 'imdb_id', 'original_language','description_letterboxd','tmdb_id','description_imdb'], inplace=True)
-    movies_df['year']=movies_df['year'].astype(int)
-    movies_df['runtime']=movies_df['runtime'].astype(int)
-    movies_df['gross']=movies_df['gross'].astype(int)
-    movies_df['revenue']=movies_df['revenue'].astype(int)
-    movies_df['budget']=movies_df['budget'].astype(int)
-    movies_df['vote_count_letterboxd']=movies_df['vote_count_letterboxd'].astype(int)
-    movies_df['vote_count_imdb']=movies_df['vote_count_imdb'].astype(int)
-    movies_df['release_date'] = pd.to_datetime(movies_df['release_date'])
+def cleanup_dataframe(movies_df):
+    """Clean and prepare dataframe for visualization."""
+    drop_columns = ['genre_imdb','spoken_languages','description_tmdb','Unnamed: 0','genre_letterboxd', 'imdb_id', 'original_language','description_letterboxd','tmdb_id','description_imdb']
+    movies_df.drop(columns=drop_columns, inplace=True, errors='ignore')
+    convert_to_int = ['year', 'runtime', 'gross', 'revenue', 'budget', 'vote_count_letterboxd', 'vote_count_imdb']
+    movies_df[convert_to_int] = movies_df[convert_to_int].apply(pd.to_numeric, errors='coerce', axis=1)
+    movies_df['release_date'] = pd.to_datetime(movies_df['release_date'], errors='coerce')
 
-    movies_df['main_genre'] = movies_df['genre_tmdb'].apply(lambda x: x.split(',')[0] if pd.notnull(x) else None)
-
-    movies_df['main_director'] = movies_df['director'].apply(lambda x: x.split(',')[0] if pd.notnull(x) else None)
+def process_columns(movies_df):
+    """Process specific columns for further analysis."""
+    movies_df['main_genre'] = movies_df['genre_tmdb'].str.split(',').str[0]
+    movies_df['main_director'] = movies_df['director'].str.split(',').str[0]
     movies_df['director_ids'] = extract_ids(movies_df['director_id'])
 
-    movies_df[['first_star', 'second_star']] = movies_df['star'].str.split(',', n=2, expand=True)[[0, 1]]
-    movies_df['second_star'] = movies_df['second_star'].str.replace('\n', '', regex=False)
+    split_stars = movies_df['star'].str.split(',', n=2, expand=True)
+    movies_df['first_star'], movies_df['second_star'] = split_stars[0], split_stars[1].str.replace('\n', '', regex=False)
     movies_df['star_ids'] = extract_ids(movies_df['star_id'])
+    movies_df[['star_id_1', 'star_id_2']] = movies_df['star_ids'].str.split(',', expand=True, n=2)[[0, 1]]
 
-    movies_df[[f'star_id_{i}' for i in range(4)]] = movies_df['star_ids'].str.split(',', expand=True, n=3)  # only starts have more than 1 ID, not directors
-
-    movies_df.drop(columns=['adult','genre_tmdb','director','star', 'star_ids','star_id_2', 'star_id_3','star_id','director_id'], inplace=True)
-    
-    movies_df['production_countries'] = movies_df['production_countries'].apply(ast.literal_eval)
-
+    # Handling production countries as a list
+    movies_df['production_countries'] = movies_df['production_countries'].apply(lambda x: ast.literal_eval(x) if pd.notnull(x) else [])
     max_countries = movies_df['production_countries'].apply(len).max()
-
     for i in range(max_countries):
         col_name = f'country_{i+1}'
         movies_df[col_name] = movies_df['production_countries'].apply(lambda x: x[i] if i < len(x) else None)
 
-    movies_df = movies_df.drop(columns=[f'country_{i}' for i in range(2, max_countries+1)])
-    movies_df.drop('production_countries', axis=1, inplace=True, errors='ignore')
+    movies_df.drop(columns=[f'country_{i}' for i in range(2, max_countries+1)], inplace=True)
     movies_df.rename(columns={'country_1': 'production_country'}, inplace=True)
-
-    movies_df['production_companies'] = movies_df['production_companies'].apply(lambda x: x.split(',')[0] if pd.notnull(x) else None)
-
     movies_df['season'] = movies_df['release_date'].dt.month.apply(get_season)
-    movies_df= movies_df.drop('release_date', axis=1)
 
-    # Visualize budget vs gross
+def visualize_data(movies_df):
+    """Create visualizations for the movie data."""
+        # Visualize budget vs gross
     fig = px.scatter(movies_df, x='budget', y='gross', trendline='ols')
     fig.update_layout(title='Budget vs Gross')
     fig.show()
@@ -81,7 +70,7 @@ def visualize(movies_df):
 
     # Visualize average seasonal gross
     seasonal_gross = movies_df.groupby(['year', 'season'])['gross'].mean().reset_index()
-    fig = px.line(seasonal_gross, x='year', y='gross', color='season',
+    fig = px.line(movies_df.groupby(['year', 'season'])['gross'].mean().reset_index(), x='year', y='gross', color='season',
                 title='Average Gross for Season trough the years',
                 labels={'year': 'Year', 'gross': 'Average Gross'},
                 category_orders={"Season": ["Winter", "Spring", "Summer", "Fall"]})
@@ -195,10 +184,12 @@ def visualize(movies_df):
     fig.update_layout(xaxis_title='Number of Appearances', yaxis_title='Gross Total', legend_title='Actor')
     fig.show()
 
-    return 
+def visualize(movies_df):
+    """Main function to handle visualization process."""
+    cleanup_dataframe(movies_df)
+    process_columns(movies_df)
+    visualize_data(movies_df)
 
 if __name__ == '__main__':
-    #Extract data from CSV file
     movies_df = pd.read_csv("data/interim/cleaned_film_dataset.csv")
     visualize(movies_df)
- 
