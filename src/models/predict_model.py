@@ -58,11 +58,11 @@ def get_user_selection(options, input_prompt):
             print("Invalid option, please try again.")
 
 def gather_movie_data():
-    genre_list = bf.get_genre_list()
-    top_producers = list(bf.top_producers.keys()) + ['Other Production Company']
-    top_countries = bf.top_countries + ['Other Country']
-    top_stars = bf.top_stars + ['Other Actor']
-    top_directors = bf.top_directors + ['Other Director']
+    genre_list = sorted(bf.get_genre_list()) + ['Other Genre']
+    top_producers = sorted(list(bf.top_producers.keys())) + ['Other Production Company']
+    top_countries = sorted(bf.top_countries) + ['Other Country']
+    top_stars = sorted(bf.top_stars) + ['Other Actor']
+    top_directors = sorted(bf.top_directors) + ['Other Director']
 
     categories = {
         'Genres' : genre_list, 

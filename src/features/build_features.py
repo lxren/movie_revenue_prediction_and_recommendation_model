@@ -157,7 +157,7 @@ def adjust_data_format(movies_df):
             movies_df[col] = movies_df[col].astype(int)
         except:
             print(f'    - {col} not in the list')
-    movies_df['release_date'] = pd.to_datetime(movies_df['release_date'])
+    movies_df['release_date'] = pd.to_datetime(movies_df['release_date'], format='mixed', dayfirst=True)
 
     # Adjust data type for 'Weighted_Rating' if it's in the columns list
     if 'Weighted_Rating' in movies_df.columns:
