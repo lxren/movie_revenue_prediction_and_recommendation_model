@@ -68,7 +68,6 @@ Optional: We recommend the use of a virtual environment (venv) when running the 
 ```bash
 pip install .
 ```
-
 ### Download data
 ```bash
 python src/data/download_dataset.py
@@ -82,6 +81,12 @@ python src/data/make_dataset.py
 python src/visuaization/make_wordcloud.py --genre <genre_name>
 
 genre_name: Action|Adult|Adventure|Animation|Biography|Comedy|Crime|Documentary|Drama|Family|Fantasy|Film-Noir|History|Horror|Music|Musical|Mystery|Romance|Sci-Fi|Science Fiction|Sport|TV Movie|Thiller|War|Western>
+```
+### Generate Movie Recommendation Based on Movie Title
+```bash
+python src/model/recommend_movie.py --movie <move_name_and_year>
+
+movie_name_and_year: Inception (2010)|Her (2013)|Dune (2021)|La La Land (2016)|Mars Attacks! (1996)|The Departed (2006)
 ```
 
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
