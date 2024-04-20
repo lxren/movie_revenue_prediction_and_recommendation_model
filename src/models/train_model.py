@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import joblib
 
+
 def create_and_fit_scaler(X):
     """
     Creates a scaler, fits it on the provided data, and returns the fitted scaler.

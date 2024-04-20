@@ -7,6 +7,7 @@ from src.features.build_features import adapt_features_for_predictions
 import src.features.build_features as bf
 from src.features.select_features import select_features
 import joblib
+import numpy as np
 import pdb
 
 def predict_model(movies_to_predict, model_path='models/gross_prediction_model.keras', scaler_path='models/scaler.gz'):
@@ -34,7 +35,7 @@ def predict_model(movies_to_predict, model_path='models/gross_prediction_model.k
 
     # Make predictions
     predictions = model.predict(X_scaled)
-    
+    predictions = np.expm1(predictions)
     return predictions
 
     
