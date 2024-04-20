@@ -80,7 +80,7 @@ python src/data/make_dataset.py
 ```bash
 python src/visuaization/make_wordcloud.py --genre <genre_name>
 
-genre_name: Action|Adult|Adventure|Animation|Biography|Comedy|Crime|Documentary|Drama|Family|Fantasy|Film-Noir|History|Horror|Music|Musical|Mystery|Romance|Sci-Fi|Science Fiction|Sport|TV Movie|Thiller|War|Western>
+genre_name: Action|Adult|Adventure|Animation|Biography|Comedy|Crime|Documentary|Drama|Family|Fantasy|Film-Noir|History|Horror|Music|Musical|Mystery|Romance|Sci-Fi|Science Fiction|Sport|TV Movie|Thiller|War|Western
 ```
 ### Generate Movie Recommendation Based on Movie Title
 ```bash
