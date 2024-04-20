@@ -17,3 +17,4 @@ matplotlib
 scikit-learn
 plotly
 tensorflow
+statsmodels
